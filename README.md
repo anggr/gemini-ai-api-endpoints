@@ -2,64 +2,174 @@
 
 A simple Node.js API to interact with Google's Gemini AI.
 
+## Features
+
+- 🤖 Integration with Google's Gemini AI
+- 🔒 Environment-based API key management
+- ✅ Input validation and error handling
+- 🌐 CORS support
+- 📊 Health check endpoint
+- 📝 Request logging
+
+## Prerequisites
+
+- Node.js (v14 or higher)
+- Google API key for Gemini AI
+
 ## Setup
 
-1.  **Install dependencies:**
+1. **Install dependencies:**
 
-    ```bash
-    npm install
-    ```
+   ```bash
+   npm install
+   ```
 
-2.  **Add your API Key:**
+2. **Environment Configuration:**
 
-    Open `index.js` and replace `YOUR_API_KEY` with your Google API key for Gemini.
+   Create a `.env` file in the root directory and add your Google API key:
 
-    ```javascript
-    const API_KEY = 'YOUR_API_KEY';
-    ```
+   ```env
+   API_KEY=your_google_gemini_api_key_here
+   PORT=3000
+   ```
 
-## Running the server
+   > **Note:** Never commit your `.env` file to version control. The API key should be at least 20 characters long.
+
+## Running the Server
 
 ```bash
 npm start
 ```
 
-The server will be running on `http://localhost:3000`.
+The server will be running on `http://localhost:3000` (or the port specified in your `.env` file).
 
-## API Endpoint
+## API Endpoints
 
-*   **URL:** `/generate`
-*   **Method:** `POST`
-*   **Body:**
+### Health Check
 
-    ```json
-    {
-      "prompt": "Your text prompt here"
-    }
-    ```
+- **URL:** `/health`
+- **Method:** `GET`
+- **Description:** Check if the server is running
+- **Response:**
+  ```json
+  {
+    "status": "OK",
+    "timestamp": "2024-01-01T00:00:00.000Z"
+  }
+  ```
 
-*   **Success Response:**
+### Generate Content
 
-    ```json
-    {
-      "generated_text": "The generated text from Gemini AI."
-    }
-    ```
+- **URL:** `/generate`
+- **Method:** `POST`
+- **Description:** Generate content using Gemini AI
+- **Request Body:**
 
-*   **Error Response:**
+  ```json
+  {
+    "prompt": "Your text prompt here"
+  }
+  ```
 
-    If the prompt is missing:
+- **Input Validation:**
+  - Prompt is required
+  - Must be a string
+  - Minimum length: 3 characters
+  - Maximum length: 10,000 characters
+  - Cannot be empty or whitespace only
 
-    ```json
-    {
-      "error": "Prompt is required"
-    }
-    ```
+- **Success Response:**
 
-    If there is an error with the Gemini API call:
+  ```json
+  {
+    "generated_text": "The generated text from Gemini AI."
+  }
+  ```
 
-    ```json
-    {
-      "error": "Failed to generate content"
-    }
-    ```# gemini-ai-api-endpoints
+- **Error Responses:**
+
+  **Missing or invalid prompt:**
+  ```json
+  {
+    "error": "Prompt is required"
+  }
+  ```
+
+  **Prompt too short:**
+  ```json
+  {
+    "error": "Prompt is too short (minimum 3 characters)"
+  }
+  ```
+
+  **Prompt too long:**
+  ```json
+  {
+    "error": "Prompt is too long (maximum 10,000 characters)"
+  }
+  ```
+
+  **API error:**
+  ```json
+  {
+    "error": "Failed to generate content"
+  }
+  ```
+
+## Example Usage
+
+### Using curl
+
+```bash
+# Health check
+curl http://localhost:3000/health
+
+# Generate content
+curl -X POST http://localhost:3000/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Write a short story about a robot learning to paint"}'
+```
+
+### Using JavaScript (fetch)
+
+```javascript
+// Generate content
+const response = await fetch('http://localhost:3000/generate', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    prompt: 'Explain quantum computing in simple terms'
+  })
+});
+
+const data = await response.json();
+console.log(data.generated_text);
+```
+
+## Dependencies
+
+- **@google/generative-ai**: Google's Generative AI SDK
+- **express**: Web framework for Node.js
+- **cors**: Cross-Origin Resource Sharing middleware
+- **dotenv**: Environment variable loader
+
+## Error Handling
+
+The API includes comprehensive error handling for:
+- Missing or invalid API keys
+- Input validation errors
+- Gemini AI service errors
+- Server errors
+
+## Security Notes
+
+- API keys are validated on startup
+- Input is sanitized and validated
+- CORS is enabled for cross-origin requests
+- Request logging is implemented for monitoring
+
+## License
+
+ISC
